@@ -1,0 +1,247 @@
+*******************************************************************************
+Three-dimensional Artikulographic Position and Align Determination with MATLAB.
+Copyright ©2005-2007 by Andreas Zierdt (Anderas.Zierdt@phonetik.uni-muenchen.de)
+TAPADM was developed with MATLAB 6.5, it is a port of TAPADCon.exe, which was
+written in C++ at the IPSK in Munich. As owners of the AG500-patents, Bahne 
+Carstens and i decided to make the TAPAD functionality avaibly to developers
+and to put this MATLAB port under the GNU General Public License. (see gpl.txt)
+TAPADM is organized like a MATLAB-Toolbox and is intended for scientifical use.
+It is distributed in the hope that it will be useful for people who want to 
+write their own EMA analysis software, but comes without any warranty. 
+*******************************************************************************
+
+ 
+7.3.3
+-----
+
+The new function 'PlotTrialData.m' opens three windows and plots both signal amplitudes and
+position data (in a flat and spatial view). A cursor can be synchronously moved through the data.
+ 
+Bug-fix: LoadTrialData
+
+7.3.2
+-----
+
+To ensure compatibility of the generated data files, TAPADM now checks the MATLAB version.
+If run under Matlab7.x (or above), all 'save' commands are performed with the option '-v6'!
+When building paths, the build-in function 'fullfile' is used to cope with file seperators 
+in a OS-specific way. TAPADM has been tested to run under Linux. The trialfile function
+is now used throughout the toolbox which simplifies the handling of filenames. Example:
+>> fullfile('2007', 'lzema1', 'lzema1nopert', trialfile(1))
+yields (on Windows): '2007\lzema1\lzema1nopert\0001.mat'
+
+ShowInfo now supports raw AG500 amplitude and position filetypes.
+
+'PlotAmps.m' generates six sub-plots and plots the signal amplitude. If possible, it also 
+evaluates the DerivativParameters of the data and shows the estimated amplitude. The 
+function returns the current figure and a callback handle, which can be used to move a 
+cursor through the sub-plots.
+
+'LoadSData' no longer displays the warning 'nonexistig file' or an error message, if called 
+without parameter. It just returns a set of empty variables, this feature can be used for a 
+defined initialization.
+
+New convenience function LoadTrial.m to collect all trial-related data from the three 'mat'-files.
+
+Bug-fix in TrialStat.m, several minor fixes and coments in Tapad.
+
+New 'turbo-mode' in Tapad, with reduced iteration depth.
+
+7.3.1
+-----
+
+Switched the Subversion Repository to svn.phonetik.uni-muenchen.de  You will find the 
+main releases at  https://svn.phonetik.uni-muenchen.de/svn/repos/TAPADM/tags
+Mail to Anderas.Zierdt@phonetik.uni-muenchen.de for informations concerning the
+access modalities.
+
+'TrialFile.m' is a new convenient function to compose filenames from trial numbers.
+
+'PlotSC.m' now supports a 'flat' mode, where it plots the 7 columns of a result 
+data set in different subfigures, and allows to browse the data with synchronized cursors.
+Cursor movement can also easily used in other plots. 
+
+Tapadm option '-q' to run quitely.
+
+New function DisCal.m that calculates calibration factors from arbitrary quantities of data. 
+The function repeatedly calculates positions for the given samples and varies re-calibration 
+factors to harmonize the distances between channels. Experimental! 
+
+The function 'RescaleData.m' rescales AG500 amplitude data, i.e. multiplies it with given
+individual factors and saves the altered data again. This can be used to apply
+additional calibration factors on amplitude data.
+
+FindBestStart now returns the quality measures for all samples;
+
+Minor Bug-Fix: decifix.m   
+
+7.3.0
+-----
+
+Better support for unix-os: The correct file seperator ('/', '\') is now automatically 
+selected in several functions.   
+
+New function 'ShowInfo.m' reads a data or result file and returns a string with 
+information on the sample rate, data format, sensor names and the processing history.
+
+Sensorspacing.m has been extensivly revised to analyze the inter-channel spacing in terms 
+of position and orientation for two or more channels. It can also return a scalar with an 
+overall quality measure, e.g. to be used as an objective function. 
+
+New function 'SmartCal.m' to perform calibration with Matlab. I decided to release the
+function, even if it is not totally satisfying. The current version should be considered
+as a collection of examples on how to calibrate 'circal'-data with different objectives.
+ 
+New function 'CalPrepData' to store AG500 calibration data as MAT file. Also a new function
+'DisCal' which calculates calibration factors from arbitrary quantities of data. 
+This is the alpha version of a new and different approach to perform calibration. 
+ 
+Bug-Fix calcamps: Function didn't used the CalibrationFactors-Argument.
+
+7.2.3
+-----
+
+Prepdata.m now calculates estimated derivatives from the amp-data and saves the parameters
+with the data in the amplitude 'mat'-file (in the structure private.DerivativParameters).
+What does 'estimated derivatives' mean? A 5'th-order Taylor series approximation is
+applied to the measured amplitudes. The Taylor parameters can than easily stored with the 
+original amplitudes. Additionally, first and second derivative can be analytically calculated 
+at any time without noise. (see trig_approx_func.m)
+
+If Tapad.m does not find this derivative parameters in the input amp-file, it will calculate 
+them belatedly. In both cases it will save them as as private.DerivativParameters with the 
+residual file. Still, the second case will be very time consuming, so you better calculate 
+them before with prepdata.
+To keep tapad.m handy, a new private function 'calcpos4trial.m' was added, which encapsulate
+the position calculation for a whole trial.
+
+The new tapad option -a automatically starts the position calculation at the best suited sample 
+in the trial and continues in both directions from that point on. (Disables -r and -f)
+
+Tapad's 'BasePath'-argument might be omitted now.
+
+The manual has been improved.
+
+7.2.2
+-----
+
+The new function 'FindBestStart.m' analyzes AG500 amplitude data to find a auspicious 
+sample to start with. When calculating positions, results are sometimes depending on
+the first sample, since the first result yields the start value for the 2nd sample and 
+so on. Former strategies were to start with the first or last sample of a trial and 
+traverse the data to the other end. This function tries to estimate the 'quality' of 
+all samples with respect to the first order derivatives of the amplitudes.
+
+Lowpass function 'FIRFilter.m' which is compatible with Phil's 'decifer' and can be 
+used e.g. prior to data downsampling. Decfix.m is a new convenience function to easily 
+filter amplitude data with one of our standard lowpass filters.
+
+Prepdata.m has been generally reviewed and bug-fixed, than filter support has been added.
+(This is probably the first fully functional version of prepdata.) 
+
+A new function 'SensorSpacing.m' to plot spatial spacing and orientation gap between 
+two channels of a trial. Can be used to estimate accuracy for reference sensors. 
+
+Bug-fix: TrialStat.m crashed in stand-alone mode. 
+TrialStat.m now displays statistics, if no output argument is given. 
+
+7.2.1
+-----
+
+Changed exit condition (i.e. termination tolerance) for tapad's levenberg-mode, 
+which always produced angular shaped trajectories. Now levenberg also yields 
+smooth (and promising) results.
+
+Normalization of the orientation-angles in tapad.m, assuring that:
+ -180 < phi <= +180 and -90 < theta <= +90
+
+tapad.m supports a callback function ('hook') to do user specific calculations.
+I wrote a new function TrialStat.m to illustrate that. TrialStat calculates some
+per-trial statistics to monitor the process during a tapad run. It can also be
+used in a stand-alone fashion to analyze existing data. 
+
+tapad.m now saves estimated amplitudes and 1st order derivatives of the measured 
+signals as parameter file. (see derivative.m) 
+
+7.2.0
+-----
+
+Several changes on tapad.m, most of them recommended by Phil Hoole, aiming to fit
+TAPADM better into the existing data processing framework at the IPSK. Even though 
+this calls for a lab-specific adaption, i tried to generalize things and hope even
+with a different data-handling concept, you will find most of the changes usefull, 
+or at least not incommoding.
+
+tapad.m does no longer read 'amp'-files, it requires pre-processing of 'amp'-files, 
+to first generate 'mat'-files from the measured signal amplitudes. This is performed 
+by prepdata.m, which also allows preprocessing of the data in terms of filtering
+and downsampling. The function is based on Phil's filteramps.m function from where i
+took all important parts. I decided to put a preliminary 'flat' version without 
+preprocessing into this release, since the 'full-flavour' version is not well tried
+yet. I will deliver it in addition with the next release.
+
+There are now three output files: one for the standard result and the other two for 
+more sophisticated output like residuals, iterations and other  private data. 
+The second is called 'residual-file' (e.g. 'resi0001.mat') and contains the residual 
+amplitudes of the position calculation.
+Notice:                          Carstens "posamps" = measured Amps - residual Amps
+
+Other (minor) changes:
+
+The new function frametext.m parenthesizes a given text with a pair of a Start and 
+End-Tag. Optional an attribute list can be used. The concept of structured textual
+comments was already introduced by Phil, i just made it more XML conform. 
+
+The formular for the 'rms-value' calculated by calcpos.m was different from the
+Carstens formular, i.e. squared value. (Fixed) 
+
+
+7.1.1
+-----
+
+tapad.m has a new 'options' argument:
+   -s don't use last result as start point (significantly increases computation time) 
+   -f flip time, i. e. process data onwards from the last point
+   -d use amplitude derivatives to weight errors
+   -l use Levenberg-Marquardt instead of Newton method
+
+The new derivative.m calculates a approximation of the derivative of data.
+The function tries to fit data to a taylor series and returns the accordant parameters 
+to approximate the data along with it's 1'st and 2'nd derivative.
+
+
+7.1.0
+-----
+
+Position calculation now uses Levenberg-Marquardt instead of Gauss-Newton Method.
+Starting from this release, TAPADM will use *different* algorithms and will not 
+produce the same results as TAPADCon.exe or the Carstens 'CalcPos'-Software!
+Further changes are planned.
+
+Use 'tapad(BasePath, AmpPath, ResPath, TrialIdx, ChanIdx)' to compute position-data.
+
+The TAPAD-result now is initialized with NaNs, to clearly mark which channels has been
+(yet) computed and which not. Initialization with zeros is more convenient for statistics,
+but can also lead to false interpretation of data and may spoil spatial plots.
+
+If there is already an existing TAPADM result file, tapad.m tries to preserve 
+the data which is not affected by the actual run. This makes it possible, to
+compute trial-data in different tapad runs.
+
+I moved some functions into the 'private' sub-dir. Private functions can only be
+invoked from TAPADM functions, thus avoiding name-conflicts. Do not put the 
+'private' sub-dir on your MATLAB path! If you want to use private TAPADM-Functions 
+in a different context, make a copy. 
+
+I decided to continue version counting from last TAPADCon.exe (3.04) and the former 
+MATLAB-Scripts (6.0), so this release becomes main version 7.
+
+As a convenience-feature, the loaddata.m now can also load TAPADM result files (*.mat)
+
+Added a 'ShowResult' function to plot single- or multi-channel position data.
+
+
+Initial release: 7.0.0 (build 5)
+--------------------------------
+
+Core functionality implemented and testet.
